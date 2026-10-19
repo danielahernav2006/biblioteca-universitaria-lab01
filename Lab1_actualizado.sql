@@ -6,17 +6,17 @@ Tables
 CREATE TABLE editorial (
     id_editorial INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(120) NOT NULL UNIQUE
-);
+); -- La relación es 1:N: una editorial puede tener muchos libros, mientras que cada libro puede tener, como máximo, una editorial en este modelo.
 
 CREATE TABLE autor (
     id_autor INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL UNIQUE
+    nombre VARCHAR(150) NOT NULL UNIQUE -- para evitar registrar dos veces exactamente el mismo nombre.
 );
 
 CREATE TABLE categoria (
     id_categoria INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(80) NOT NULL UNIQUE
-);
+);  -- La categoría no se guarda directamente en la tabla libro porque un libro puede pertenecer a varias categorías.
 
 CREATE TABLE libro (
     id_libro INT AUTO_INCREMENT PRIMARY KEY,
@@ -25,17 +25,22 @@ CREATE TABLE libro (
     id_editorial INT,
     año INT CHECK (año BETWEEN 1400 AND 2100),
     descripcion VARCHAR(500),
-    FOREIGN KEY (id_editorial) REFERENCES editorial(id_editorial) ON DELETE SET NULL
+    FOREIGN KEY (id_editorial) REFERENCES editorial(id_editorial) ON DELETE SET NULL -- Si se elimina una editorial, MySQL deja el campo id_editorial del libro en NULL, pero conserva el libro.
 );
 
+
+-- Un libro puede tener muchos autores y un autor puede escribir muchos libros.
+-- la relación conceptual es N:M
 CREATE TABLE libro_autor (
     id_libro INT NOT NULL,
     id_autor INT NOT NULL,
     PRIMARY KEY (id_libro, id_autor),
-    FOREIGN KEY (id_libro) REFERENCES libro(id_libro) ON DELETE CASCADE,
+    FOREIGN KEY (id_libro) REFERENCES libro(id_libro) ON DELETE CASCADE, -- Si eliminamos un libro, automáticamente se eliminan las asociaciones de ese libro en libro_autor.
     FOREIGN KEY (id_autor) REFERENCES autor(id_autor)
 );
 
+
+-- Un libro puede tener muchas categorías y una categoría puede contener muchos libros.
 CREATE TABLE libro_categoria (
     id_libro INT NOT NULL,
     id_categoria INT NOT NULL,
@@ -51,13 +56,16 @@ CREATE TABLE ubicacion (
     UNIQUE (sala, estante)
 );
 
+
+-- Libro (1) → (N) Ejemplares
+-- Cada ejemplar pertenece a un solo libro, pero un libro puede tener varios ejemplares.
 CREATE TABLE ejemplar (
     id_ejemplar INT AUTO_INCREMENT PRIMARY KEY,
     codigo_barras VARCHAR(30) NOT NULL UNIQUE,
     id_libro INT NOT NULL,
     id_ubicacion INT,
-    estado VARCHAR(20) NOT NULL DEFAULT 'DISPONIBLE' CHECK (estado IN ('DISPONIBLE', 'PRESTADO', 'PERDIDO')),
-    UNIQUE (id_ejemplar, id_libro),
+    estado VARCHAR(20) NOT NULL DEFAULT 'DISPONIBLE' CHECK (estado IN ('DISPONIBLE', 'PRESTADO', 'PERDIDO', 'EN_REVISION')),
+    UNIQUE (id_ejemplar, id_libro), -- para poder referenciarla desde la tabla prestamo. Porque necesitamos asegurarnos de que el ejemplar asignado realmente pertenezca al libro que se está prestando.
     FOREIGN KEY (id_libro) REFERENCES libro(id_libro),
     FOREIGN KEY (id_ubicacion) REFERENCES ubicacion(id_ubicacion) ON DELETE SET NULL
 );
@@ -65,15 +73,17 @@ CREATE TABLE ejemplar (
 CREATE TABLE carrera (
     id_carrera INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(120) NOT NULL UNIQUE
-);
+);  -- Separar las carreras en otra tabla evita repetir sus nombres en todos los registros de estudiantes.
 
+
+-- almacena las personas que interactúan con el sistema.
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     codigo VARCHAR(20) NOT NULL UNIQUE,
     identificacion VARCHAR(20) NOT NULL UNIQUE,
     nombres VARCHAR(150) NOT NULL,
     correo VARCHAR(150) NOT NULL UNIQUE CHECK (correo LIKE '%@%'),
-    rol VARCHAR(20) NOT NULL CHECK (rol IN ('ESTUDIANTE', 'DOCENTE', 'BIBLIOTECARIO')),
+    rol VARCHAR(20) NOT NULL CHECK (rol IN ('ESTUDIANTE', 'DOCENTE', 'BIBLIOTECARIO')), Porque los permisos y plazos dependen del tipo de usuario.
     id_carrera INT,
     estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO', 'BLOQUEADO')),
     contraseña VARCHAR(255) NOT NULL,
@@ -84,13 +94,16 @@ CREATE TABLE parametro (
     clave VARCHAR(50) PRIMARY KEY,
     valor DECIMAL(10,2) NOT NULL,
     descripcion VARCHAR(200) NOT NULL
-);
+); -- Porque permite almacenar reglas de negocio modificables sin tener que cambiar necesariamente los valores escritos en el código Python.
+-- La tabla solo almacena la configuración. Para aplicar el límite de tres préstamos o calcular multas, la aplicación debe consultar y utilizar estos parámetros.
+
+
 
 CREATE TABLE prestamo (
     id_prestamo INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     id_libro INT NOT NULL,
-    id_ejemplar INT,
+    id_ejemplar INT, -- El ejemplar se asigna cuando el bibliotecario aprueba el préstamo. Así distinguimos entre solicitar una obra y recibir efectivamente una copia física.
     fecha_solicitud DATE NOT NULL,
     fecha_prestamo DATE,
     fecha_vencimiento DATE,
@@ -98,19 +111,21 @@ CREATE TABLE prestamo (
     estado VARCHAR(20) NOT NULL DEFAULT 'SOLICITADO' CHECK (estado IN ('SOLICITADO', 'ACTIVO', 'RECHAZADO', 'DEVUELTO')),
     motivo_rechazo VARCHAR(200),
     CHECK (fecha_vencimiento >= fecha_prestamo),
-    CHECK (estado NOT IN ('ACTIVO', 'DEVUELTO') OR (id_ejemplar IS NOT NULL AND fecha_prestamo IS NOT NULL AND fecha_vencimiento IS NOT NULL AND id_bibliotecario IS NOT NULL)),
+    CHECK (estado NOT IN ('ACTIVO', 'DEVUELTO') OR (id_ejemplar IS NOT NULL AND fecha_prestamo IS NOT NULL AND fecha_vencimiento IS NOT NULL AND id_bibliotecario IS NOT NULL)),  -- Si el préstamo está ACTIVO o DEVUELTO, obligatoriamente debe tener ejemplar asignado, fecha de inicio, fecha de vencimiento y bibliotecario responsable.
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
     FOREIGN KEY (id_libro) REFERENCES libro(id_libro),
-    FOREIGN KEY (id_ejemplar, id_libro) REFERENCES ejemplar(id_ejemplar, id_libro),
+    FOREIGN KEY (id_ejemplar, id_libro) REFERENCES ejemplar(id_ejemplar, id_libro), -- De esta manera, el préstamo no puede asociar un ejemplar con un título incorrecto.
     FOREIGN KEY (id_bibliotecario) REFERENCES usuario(id_usuario)
 );
 
+
+-- registra la entrega física de un ejemplar que estaba prestado.
 CREATE TABLE devolucion (
     id_devolucion INT AUTO_INCREMENT PRIMARY KEY,
-    id_prestamo INT NOT NULL UNIQUE,
+    id_prestamo INT NOT NULL UNIQUE, -- una sola devolución por préstamo. Eso genera una relación entre prestamo y devolucion de uno a cero o uno: un préstamo puede no tener devolución todavía, pero puede tener como máximo una.
     fecha_devolucion DATE NOT NULL,
     id_bibliotecario INT NOT NULL,
-    condicion VARCHAR(20) NOT NULL DEFAULT 'BUENO' CHECK (condicion IN ('BUENO', 'DAÑADO', 'PÁGINAS FALTANTES')),
+    condicion VARCHAR(20) NOT NULL DEFAULT 'BUENO' CHECK (condicion IN ('BUENO', 'DAÑADO', 'PÁGINAS FALTANTES')), -- En nuestra versión mejorada, cuando la condición es DAÑADO o PÁGINAS FALTANTES, Python actualiza el estado del ejemplar a EN_REVISION.
     observaciones VARCHAR(300),
     FOREIGN KEY (id_prestamo) REFERENCES prestamo(id_prestamo),
     FOREIGN KEY (id_bibliotecario) REFERENCES usuario(id_usuario)
@@ -118,9 +133,9 @@ CREATE TABLE devolucion (
 
 CREATE TABLE multa (
     id_multa INT AUTO_INCREMENT PRIMARY KEY,
-    id_devolucion INT NOT NULL UNIQUE,
-    dias_retraso INT NOT NULL CHECK (dias_retraso > 0),
-    valor_dia DECIMAL(10,2) NOT NULL CHECK (valor_dia >= 0),
+    id_devolucion INT NOT NULL UNIQUE, -- Porque cada devolución puede tener, como máximo, una multa asociada en este diseño.
+    dias_retraso INT NOT NULL CHECK (dias_retraso > 0), -- Una devolución sin retraso no necesita un registro de multa.
+    valor_dia DECIMAL(10,2) NOT NULL CHECK (valor_dia >= 0), -- Porque la tarifa puede cambiar en el futuro. Guardar la tarifa aplicada permite conservar el valor histórico utilizado para calcular una multa concreta.
     monto DECIMAL(12,2) NOT NULL CHECK (monto >= 0),
     estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'PAGADA')),
     fecha_pago DATE,
@@ -128,6 +143,8 @@ CREATE TABLE multa (
     FOREIGN KEY (id_devolucion) REFERENCES devolucion(id_devolucion)
 );
 
+
+-- El orden de las inserciones importa
 INSERT INTO parametro (clave, valor, descripcion) VALUES
 ('TARIFA_MULTA_DIA', 1000, 'Valor de la multa por cada día de retraso (COP)'),
 ('DIAS_PRESTAMO_ESTUDIANTE', 8, 'Días de préstamo para estudiantes'),
