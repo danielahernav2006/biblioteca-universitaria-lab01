@@ -1,0 +1,37 @@
+{# Campos comunes del formulario de usuario (registro y gestión).
+   Requiere: u (datos actuales), carreras, roles (lista de roles elegibles), rol_fijo (opcional) #}
+<div class="rejilla-2">
+  <div>
+    <label for="codigo">Código *</label>
+    <input id="codigo" name="codigo" maxlength="20" required value="{{ u.codigo or '' }}">
+  </div>
+  <div>
+    <label for="identificacion">Identificación *</label>
+    <input id="identificacion" name="identificacion" maxlength="20" required value="{{ u.identificacion or '' }}">
+  </div>
+</div>
+<label for="nombres">Nombres completos *</label>
+<input id="nombres" name="nombres" maxlength="150" required value="{{ u.nombres or '' }}" autocomplete="name">
+<label for="correo">Correo *</label>
+<input id="correo" name="correo" type="email" maxlength="150" required value="{{ u.correo or '' }}" autocomplete="email">
+<div class="rejilla-2">
+  <div>
+    <label for="rol">Rol *</label>
+    {% if rol_fijo %}
+      <input id="rol" value="{{ rol_fijo|capitalize }}" disabled>
+      <p class="ayuda">El rol de bibliotecario se conserva al editar.</p>
+    {% else %}
+      <select id="rol" name="rol" required>
+        {% for r in roles %}<option value="{{ r }}" {{ 'selected' if u.rol == r }}>{{ r|capitalize }}</option>{% endfor %}
+      </select>
+    {% endif %}
+  </div>
+  <div>
+    <label for="id_carrera">Carrera</label>
+    <select id="id_carrera" name="id_carrera">
+      <option value="">— Sin carrera —</option>
+      {% for c in carreras %}<option value="{{ c.id_carrera }}" {{ 'selected' if u.id_carrera|string == c.id_carrera|string }}>{{ c.nombre }}</option>{% endfor %}
+    </select>
+    <p class="ayuda" id="ayuda-carrera">Obligatoria para estudiantes.</p>
+  </div>
+</div>

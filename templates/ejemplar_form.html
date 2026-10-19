@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ 'Editar' if editando else 'Registrar' }} ejemplar</h2>
+<p>Libro: <a href="{{ url_for('catalogo.detalle_libro', id_libro=libro.id_libro) }}">{{ libro.titulo }}</a></p>
+<form method="post">
+  <label>Código de barras *</label><input name="codigo_barras" maxlength="30" required value="{{ ej.codigo_barras if ej }}">
+  <label>Ubicación</label>
+  <select name="id_ubicacion"><option value="">— Sin ubicación —</option>
+    {% for u in ubicaciones %}<option value="{{ u.id_ubicacion }}" {{ 'selected' if ej and ej.id_ubicacion == u.id_ubicacion }}>{{ u.sala }} / {{ u.estante }}</option>{% endfor %}
+  </select>
+  <label>Estado</label>
+  {% if bloqueado %}
+    <input value="PRESTADO (lo gestiona el módulo de préstamos)" disabled>
+  {% else %}
+    <select name="estado">{% for s in ['DISPONIBLE','EN_REVISION','PERDIDO'] %}<option {{ 'selected' if ej and ej.estado == s }}>{{ s }}</option>{% endfor %}</select>
+  {% endif %}
+  <p class="suave pequeno">Un ejemplar EN_REVISION no se presta. Cámbialo a DISPONIBLE solo tras inspeccionarlo.</p>
+  <p><button>Guardar</button> <a href="{{ url_for('catalogo.detalle_libro', id_libro=libro.id_libro) }}">Cancelar</a></p>
+</form>
+{% endblock %}

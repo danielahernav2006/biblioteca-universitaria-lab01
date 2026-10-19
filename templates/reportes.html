@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% block title %}Reportes · Biblioteca{% endblock %}
+{% block content %}
+<div class="encabezado-pagina">
+  <div>
+    <p class="antetitulo">Gestión</p>
+    <h1>Reportes</h1>
+  </div>
+</div>
+
+<form class="filtros" method="get">
+  <div>
+    <label for="desde">Desde</label>
+    <input id="desde" type="date" name="desde" value="{{ desde }}">
+  </div>
+  <div>
+    <label for="hasta">Hasta</label>
+    <input id="hasta" type="date" name="hasta" value="{{ hasta }}">
+  </div>
+  <button class="btn">Filtrar</button>
+</form>
+
+<section class="seccion">
+  <h2>Inventario por estado</h2>
+  <div class="cifras">
+    <div><strong>{{ inventario.DISPONIBLE }}</strong>disponibles</div>
+    <div><strong>{{ inventario.PRESTADO }}</strong>prestados</div>
+    <div><strong>{{ inventario.PERDIDO }}</strong>perdidos</div>
+    <div><strong>{{ inventario.EN_REVISION }}</strong>en revisión</div>
+  </div>
+</section>
+
+<section class="seccion">
+  <h2>Préstamos activos y vencidos</h2>
+  <p class="suave pequeno">{{ activos|length }} activo(s), {{ vencidos|length }} vencido(s)</p>
+  <div class="tabla-scroll">
+  <table>
+    <tr><th>Usuario</th><th>Libro</th><th>Ejemplar</th><th>Préstamo</th><th>Vence</th><th>Estado</th></tr>
+    {% for p in activos %}
+    <tr>
+      <td>{{ p.nombres }}<div class="ayuda">{{ p.codigo }}</div></td>
+      <td>{{ p.titulo }}</td>
+      <td>{{ p.codigo_barras }}</td>
+      <td>{{ p.fecha_prestamo }}</td>
+      <td>{{ p.fecha_vencimiento }}</td>
+      <td>{% if p.dias_retraso > 0 %}<span class="badge badge-peligro">Vencido ({{ p.dias_retraso }} días)</span>
+          {% else %}<span class="badge badge-ok">Al día</span>{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="vacio">No hay préstamos activos.</td></tr>
+    {% endfor %}
+  </table>
+  </div>
+</section>
+
+<section class="seccion">
+  <h2>Libros más prestados</h2>
+  <table>
+    <tr><th>Libro</th><th>ISBN</th><th>Veces</th></tr>
+    {% for l in libros %}
+    <tr><td>{{ l.titulo }}</td><td>{{ l.isbn }}</td><td>{{ l.veces }}</td></tr>
+    {% else %}
+    <tr><td colspan="3" class="vacio">No hay préstamos en ese periodo.</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section class="seccion">
+  <h2>Usuarios con más préstamos</h2>
+  <table>
+    <tr><th>Usuario</th><th>Código</th><th>Rol</th><th>Préstamos</th></tr>
+    {% for u in usuarios %}
+    <tr><td>{{ u.nombres }}</td><td>{{ u.codigo }}</td><td>{{ u.rol|capitalize }}</td><td>{{ u.prestamos }}</td></tr>
+    {% else %}
+    <tr><td colspan="4" class="vacio">No hay préstamos en ese periodo.</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}

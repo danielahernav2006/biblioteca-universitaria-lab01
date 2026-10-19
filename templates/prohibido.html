@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block title %}Sin permiso · Biblioteca{% endblock %}
+{% block content %}
+<div class="panel-acceso">
+  <p class="antetitulo">Error 403</p>
+  <h1>No tienes permiso</h1>
+  <p class="suave">Esta acción está reservada al personal de la biblioteca.</p>
+  <p><a class="btn" href="{{ url_for('catalogo.listar_libros') }}">Volver al catálogo</a></p>
+</div>
+{% endblock %}

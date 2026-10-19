@@ -1,0 +1,34 @@
+{% from "_iconos.html" import icono %}
+{% extends "layout.html" %}
+{% block title %}{{ u.nombres }} · Biblioteca{% endblock %}
+{% block content %}
+<div class="encabezado-pagina">
+  <div>
+    <p class="antetitulo"><a href="{{ url_for('usuarios.listar_usuarios') }}">Usuarios</a> · {{ u.rol|capitalize }}</p>
+    <h1>{{ u.nombres }}</h1>
+  </div>
+  <div class="acciones" style="margin-top: 0">
+    <a class="btn" href="{{ url_for('usuarios.form_usuario', id_usuario=u.id_usuario) }}">{{ icono('editar') }} Editar</a>
+    {% if not es_uno_mismo %}
+    <form class="inline" method="post" action="{{ url_for('usuarios.cambiar_estado', id_usuario=u.id_usuario) }}"
+          data-confirmar="{{ '¿Bloquear a este usuario?' if u.estado == 'ACTIVO' else '¿Activar a este usuario?' }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token }}">
+      <button class="btn {{ 'btn-peligro' if u.estado == 'ACTIVO' }}">{{ icono('candado') }} {{ 'Bloquear' if u.estado == 'ACTIVO' else 'Activar' }}</button>
+    </form>
+    {% endif %}
+    {% if puede_eliminar %}
+    <form class="inline" method="post" action="{{ url_for('usuarios.eliminar_usuario', id_usuario=u.id_usuario) }}"
+          data-confirmar="¿Eliminar este usuario? Esta acción no se puede deshacer.">
+      <input type="hidden" name="csrf" value="{{ csrf_token }}">
+      <button class="btn btn-peligro">Eliminar</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% include "_ficha_usuario.html" %}
+{% if not puede_eliminar and not es_uno_mismo %}
+<p class="ayuda">Este usuario tiene préstamos o devoluciones asociados, por eso no puede eliminarse. Puedes bloquearlo.</p>
+{% endif %}
+<h2>Historial de préstamos</h2>
+{% include "_historial.html" %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% from "_iconos.html" import icono %}
+{% extends "layout.html" %}
+{% block title %}Mi cuenta · Biblioteca{% endblock %}
+{% block content %}
+<div class="encabezado-pagina">
+  <div>
+    <p class="antetitulo">{{ u.rol|capitalize }}</p>
+    <h1>{{ u.nombres }}</h1>
+  </div>
+  <a class="btn" href="{{ url_for('catalogo.listar_libros') }}">{{ icono('buscar') }} Buscar libros</a>
+</div>
+{% include "_ficha_usuario.html" %}
+<h2>Mis préstamos</h2>
+{% include "_historial.html" %}
+{% endblock %}

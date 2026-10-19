@@ -1,0 +1,71 @@
+{% from "_iconos.html" import icono %}
+{% extends "layout.html" %}
+{% block title %}Usuarios · Biblioteca{% endblock %}
+{% block content %}
+<div class="encabezado-pagina">
+  <div>
+    <p class="antetitulo">Gestión</p>
+    <h1>Usuarios</h1>
+  </div>
+  <a class="btn btn-primario" href="{{ url_for('usuarios.form_usuario') }}">{{ icono('mas') }} Nuevo usuario</a>
+</div>
+
+<form class="filtros" method="get" role="search">
+  <div class="filtro-busqueda">
+    <label for="q">Buscar</label>
+    <input id="q" name="q" value="{{ q }}" placeholder="Nombre, código, identificación o correo">
+  </div>
+  <div>
+    <label for="campo">En</label>
+    <select id="campo" name="campo">
+      {% for v, t in [('nombres','Nombres'),('codigo','Código'),('identificacion','Identificación'),('correo','Correo')] %}
+      <option value="{{ v }}" {{ 'selected' if campo == v }}>{{ t }}</option>{% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="rol">Rol</label>
+    <select id="rol" name="rol">
+      <option value="">Todos</option>
+      {% for r in roles %}<option value="{{ r }}" {{ 'selected' if rol == r }}>{{ r|capitalize }}</option>{% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="estado">Estado</label>
+    <select id="estado" name="estado">
+      <option value="">Todos</option>
+      {% for s in ['ACTIVO', 'BLOQUEADO'] %}<option value="{{ s }}" {{ 'selected' if estado == s }}>{{ s|capitalize }}</option>{% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="carrera">Carrera</label>
+    <select id="carrera" name="carrera">
+      <option value="">Todas</option>
+      {% for c in carreras %}<option value="{{ c.id_carrera }}" {{ 'selected' if carrera == c.id_carrera|string }}>{{ c.nombre }}</option>{% endfor %}
+    </select>
+  </div>
+  <button class="btn">{{ icono('buscar') }} Filtrar</button>
+</form>
+
+<p class="suave pequeno">{{ usuarios|length }} usuario(s)
+  {% if q or rol or estado or carrera %}· <a href="{{ url_for('usuarios.listar_usuarios') }}">Quitar filtros</a>{% endif %}</p>
+
+<div class="tabla-scroll">
+<table>
+  <tr><th>Nombre</th><th>Código</th><th>Rol</th><th>Carrera</th><th>Préstamos activos</th><th>Estado</th><th></th></tr>
+  {% for u in usuarios %}
+  <tr>
+    <td><a href="{{ url_for('usuarios.detalle_usuario', id_usuario=u.id_usuario) }}">{{ u.nombres }}</a>
+        <div class="ayuda">{{ u.correo }}</div></td>
+    <td>{{ u.codigo }}</td>
+    <td>{{ u.rol|capitalize }}</td>
+    <td>{{ u.carrera or '—' }}</td>
+    <td>{{ u.activos }}</td>
+    <td><span class="badge {{ 'badge-ok' if u.estado == 'ACTIVO' else 'badge-peligro' }}">{{ u.estado|capitalize }}</span></td>
+    <td><a href="{{ url_for('usuarios.form_usuario', id_usuario=u.id_usuario) }}">Editar</a></td>
+  </tr>
+  {% else %}
+  <tr><td colspan="7" class="vacio">No hay usuarios que coincidan con la búsqueda.</td></tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}

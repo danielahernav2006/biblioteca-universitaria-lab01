@@ -1,0 +1,8 @@
+{# Datos de un usuario. Requiere: u (con carrera = nombre de la carrera) #}
+<dl class="ficha">
+  <div><dt>Código</dt><dd>{{ u.codigo }}</dd></div>
+  <div><dt>Identificación</dt><dd>{{ u.identificacion }}</dd></div>
+  <div><dt>Correo</dt><dd>{{ u.correo }}</dd></div>
+  <div><dt>Carrera</dt><dd>{{ u.carrera or '—' }}</dd></div>
+  <div><dt>Estado</dt><dd><span class="badge {{ 'badge-ok' if u.estado == 'ACTIVO' else 'badge-peligro' }}">{{ u.estado|capitalize }}</span></dd></div>
+</dl>

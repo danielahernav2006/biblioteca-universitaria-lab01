@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block title %}Gestión de préstamos{% endblock %}
+{% block content %}
+<h1>Gestión de préstamos y devoluciones</h1>
+<h2>Solicitudes pendientes</h2><div class="tabla-scroll"><table><thead><tr><th>ID</th><th>Usuario</th><th>Libro</th><th>Fecha</th><th>Disponibles</th><th>Acciones</th></tr></thead><tbody>
+{% for p in solicitudes %}<tr><td>{{ p.id_prestamo }}</td><td>{{ p.nombres }}</td><td>{{ p.titulo }}</td><td>{{ p.fecha_solicitud }}</td><td>{{ p.disponibles }}</td><td>
+<form method="post" action="{{ url_for('prestamos.aprobar',id_prestamo=p.id_prestamo) }}" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="btn btn-primario btn-sm" {% if not p.disponibles %}disabled{% endif %}>Aprobar</button></form>
+<form method="post" action="{{ url_for('prestamos.rechazar',id_prestamo=p.id_prestamo) }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><input name="motivo" maxlength="200" placeholder="Motivo del rechazo"><button class="btn btn-sutil btn-sm">Rechazar</button></form>
+</td></tr>{% else %}<tr><td colspan="6">No hay solicitudes pendientes.</td></tr>{% endfor %}</tbody></table></div>
+<h2>Préstamos activos / registrar devolución</h2><div class="tabla-scroll"><table><thead><tr><th>Usuario</th><th>Libro</th><th>Ejemplar</th><th>Vence</th><th>Devolver</th></tr></thead><tbody>
+{% for p in activos %}<tr><td>{{ p.nombres }}</td><td>{{ p.titulo }}</td><td>{{ p.codigo_barras }}</td><td>{{ p.fecha_vencimiento }} {% if p.fecha_vencimiento < hoy %}<strong>(VENCIDO)</strong>{% endif %}</td><td>
+<form method="post" action="{{ url_for('prestamos.devolver',id_prestamo=p.id_prestamo) }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><label>Condición <select name="condicion"><option>BUENO</option><option>DAÑADO</option><option>PÁGINAS FALTANTES</option></select></label><input name="observaciones" maxlength="300" placeholder="Observaciones (opcional)"><button class="btn btn-primario btn-sm" onclick="return confirm('¿Confirmar devolución?')">Registrar devolución</button></form>
+</td></tr>{% else %}<tr><td colspan="5">No hay préstamos activos.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

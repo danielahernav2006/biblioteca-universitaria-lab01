@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ 'Editar libro' if libro and libro.id_libro else 'Registrar libro' }}</h2>
+<form method="post">
+  <label>ISBN *</label><input name="isbn" maxlength="17" required value="{{ libro.isbn if libro }}">
+  <label>Título *</label><input name="titulo" maxlength="200" required value="{{ libro.titulo if libro }}">
+  <label>Autores (separados por coma)</label><input name="autores" value="{{ autores }}">
+  <label>Editorial</label>
+  <select name="id_editorial"><option value="">— Sin editorial —</option>
+    {% for e in editoriales %}<option value="{{ e.id_editorial }}" {{ 'selected' if libro and libro.id_editorial == e.id_editorial }}>{{ e.nombre }}</option>{% endfor %}
+  </select>
+  <label>Año</label><input name="anio" type="number" min="1400" max="2100" value="{{ libro.anio if libro and libro.anio else '' }}">
+  <label>Categorías</label>
+  <div class="chk">{% for c in categorias %}<label><input type="checkbox" name="categorias" value="{{ c.id_categoria }}" {{ 'checked' if c.id_categoria in sel }}> {{ c.nombre }}</label>{% endfor %}</div>
+  <label>Descripción</label><textarea name="descripcion" maxlength="500" rows="4">{{ libro.descripcion or '' if libro }}</textarea>
+  <p><button>Guardar</button> <a href="{{ url_for('catalogo.listar_libros') }}">Cancelar</a></p>
+</form>
+{% endblock %}

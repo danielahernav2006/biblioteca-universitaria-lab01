@@ -1,0 +1,60 @@
+{% from "_iconos.html" import icono %}
+{% extends "layout.html" %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="antetitulo">Biblioteca universitaria</p>
+    <h1>Encuentra tu próxima <em>lectura</em>.</h1>
+    <p class="intro">Consulta el catálogo, revisa qué ejemplares están disponibles y
+      lleva el control de tus préstamos desde tu cuenta.</p>
+    <div class="cifras">
+      <div><strong>{{ cifras.libros }}</strong>títulos</div>
+      <div><strong>{{ cifras.ejemplares }}</strong>ejemplares</div>
+      <div><strong>{{ cifras.disponibles }}</strong>disponibles hoy</div>
+    </div>
+  </div>
+  <form class="busqueda" method="get" action="{{ url_for('catalogo.listar_libros') }}" role="search">
+    <label for="q">Buscar en el catálogo</label>
+    <div class="campos">
+      <input id="q" name="q" placeholder="Título, autor, ISBN…">
+      <select name="campo" aria-label="Buscar por">
+        {% for v, t in [('titulo','Título'),('autor','Autor'),('isbn','ISBN'),('categoria','Categoría')] %}
+        <option value="{{ v }}">{{ t }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="chk" style="margin-top: .75rem">
+      <label><input type="checkbox" name="solo_disp" value="1"> Solo disponibles</label>
+    </div>
+    <button class="btn btn-primario">{{ icono('buscar') }} Buscar</button>
+  </form>
+</section>
+
+{% if libros %}
+<section class="seccion">
+  <div class="seccion-titulo">
+    <h2>Disponibles ahora</h2>
+    <a href="{{ url_for('catalogo.listar_libros', solo_disp=1) }}">Ver todos {{ icono('flecha') }}</a>
+  </div>
+  <ul class="lista-libros">
+    {% for l in libros %}
+    <li>
+      <a class="titulo" href="{{ url_for('catalogo.detalle_libro', id_libro=l.id_libro) }}">{{ l.titulo }}</a>
+      <p class="meta">{{ l.autores or 'Autor no registrado' }}{% if l.anio %} · {{ l.anio }}{% endif %}</p>
+      <span class="badge badge-ok">{{ l.disponibles }} de {{ l.total }} disponibles</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if servicio %}
+<section class="seccion">
+  <div class="seccion-titulo"><h2>Cómo funciona el préstamo</h2></div>
+  <div class="servicio">
+    {% for p in servicio %}
+    <div><strong>{{ '%g' % p.valor }}</strong><p>{{ p.descripcion }}</p></div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

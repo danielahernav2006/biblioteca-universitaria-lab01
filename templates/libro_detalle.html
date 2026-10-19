@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ l.titulo }}</h2>
+<p><b>ISBN:</b> {{ l.isbn }} · <b>Año:</b> {{ l.anio or '—' }} · <b>Editorial:</b> {{ l.editorial or '—' }}<br>
+<b>Autores:</b> {{ l.autores or '—' }}<br><b>Categorías:</b> {{ l.categorias or '—' }}<br>
+{{ l.descripcion or '' }}</p>
+<p class="{{ 'ok' if l.disponibles else 'no' }}"><b>Disponibles: {{ l.disponibles }} de {{ l.total }}</b></p>
+<p><a href="{{ url_for('catalogo.form_libro', id_libro=l.id_libro) }}">Editar libro</a>
+<form class="inline" method="post" action="{{ url_for('catalogo.eliminar_libro', id_libro=l.id_libro) }}"
+ onsubmit="return confirm('¿Eliminar este libro?')"><button>Eliminar libro</button></form></p>
+{% if usuario_actual and usuario_actual.rol in ('ESTUDIANTE', 'DOCENTE') and usuario_actual.estado == 'ACTIVO' %}
+<form method="post" action="{{ url_for('prestamos.solicitar', id_libro=l.id_libro) }}">
+<input type="hidden" name="csrf" value="{{ csrf_token }}">
+<button class="btn btn-primario" {% if not l.disponibles %}disabled{% endif %}>Solicitar préstamo</button>
+</form>{% endif %}
+<h3>Ejemplares</h3>
+<p><a href="{{ url_for('catalogo.form_ejemplar', id_libro=l.id_libro) }}">+ Registrar ejemplar</a></p>
+<table><tr><th>Código de barras</th><th>Ubicación</th><th>Estado</th><th></th></tr>
+{% for e in ejemplares %}
+<tr><td>{{ e.codigo_barras }}</td><td>{{ (e.sala ~ ' / ' ~ e.estante) if e.sala else '—' }}</td>
+<td class="{{ 'ok' if e.estado == 'DISPONIBLE' else 'no' }}">{{ e.estado }}</td>
+<td><a href="{{ url_for('catalogo.form_ejemplar', id_ejemplar=e.id_ejemplar) }}">Editar</a>
+<form class="inline" method="post" action="{{ url_for('catalogo.eliminar_ejemplar', id_ejemplar=e.id_ejemplar) }}"
+ onsubmit="return confirm('¿Eliminar ejemplar?')"><button>Eliminar</button></form></td></tr>
+{% else %}<tr><td colspan="4">Sin ejemplares registrados.</td></tr>{% endfor %}
+</table>
+{% endblock %}

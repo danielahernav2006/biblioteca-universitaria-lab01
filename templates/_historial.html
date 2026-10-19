@@ -1,0 +1,29 @@
+{# Historial de préstamos de un usuario. Requiere: prestamos #}
+{% set clases = {'ACTIVO': 'badge-ok', 'SOLICITADO': 'badge-aviso', 'RECHAZADO': 'badge-peligro'} %}
+{% if prestamos %}
+<div class="tabla-scroll">
+<table>
+  <tr><th>Libro</th><th>Ejemplar</th><th>Solicitud</th><th>Préstamo</th><th>Vence</th>
+      <th>Estado</th><th>Devolución</th><th>Multa</th></tr>
+  {% for p in prestamos %}
+  <tr>
+    <td><a href="{{ url_for('catalogo.detalle_libro', id_libro=p.id_libro) }}">{{ p.titulo }}</a></td>
+    <td>{{ p.codigo_barras or '—' }}</td>
+    <td>{{ p.fecha_solicitud }}</td>
+    <td>{{ p.fecha_prestamo or '—' }}</td>
+    <td>{{ p.fecha_vencimiento or '—' }}</td>
+    <td>
+      {% if p.vencido %}<span class="badge badge-peligro">Vencido</span>
+      {% else %}<span class="badge {{ clases.get(p.estado, '') }}">{{ p.estado|capitalize }}</span>{% endif %}
+      {% if p.motivo_rechazo %}<div class="ayuda">{{ p.motivo_rechazo }}</div>{% endif %}
+    </td>
+    <td>{% if p.fecha_devolucion %}{{ p.fecha_devolucion }}<div class="ayuda">{{ p.condicion|capitalize }}</div>{% else %}—{% endif %}</td>
+    <td>{% if p.monto is not none %}${{ '{:,.0f}'.format(p.monto) }}
+        <div class="ayuda">{{ p.estado_multa|capitalize }}</div>{% else %}—{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+{% else %}
+<p class="vacio">Sin préstamos registrados.</p>
+{% endif %}

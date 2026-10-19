@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Catálogo de libros</h2>
+<form method="get" class="row">
+  <input name="q" value="{{ q }}" placeholder="Buscar...">
+  <select name="campo" style="width:auto">
+    {% for v, t in [('titulo','Título'),('autor','Autor'),('isbn','ISBN'),('categoria','Categoría')] %}
+    <option value="{{ v }}" {{ 'selected' if campo == v }}>{{ t }}</option>{% endfor %}
+  </select>
+  <label style="white-space:nowrap;margin:0;align-self:center"><input type="checkbox" name="solo_disp" {{ 'checked' if solo }}> Solo disponibles</label>
+  <button>Buscar</button>
+</form>
+<p>{{ libros|length }} resultado(s)</p>
+<table>
+<tr><th>ISBN</th><th>Título</th><th>Autores</th><th>Categorías</th><th>Año</th><th>Disponibilidad</th><th></th></tr>
+{% for l in libros %}
+<tr><td>{{ l.isbn }}</td><td><a href="{{ url_for('catalogo.detalle_libro', id_libro=l.id_libro) }}">{{ l.titulo }}</a></td>
+<td>{{ l.autores or '—' }}</td><td>{{ l.categorias or '—' }}</td><td>{{ l.anio or '' }}</td>
+<td class="{{ 'ok' if l.disponibles else 'no' }}">{{ l.disponibles }} de {{ l.total }}</td>
+<td><a href="{{ url_for('catalogo.form_libro', id_libro=l.id_libro) }}">Editar</a></td></tr>
+{% else %}<tr><td colspan="7">Sin resultados.</td></tr>{% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,461 @@
+/* Estilos compartidos de la biblioteca.
+   Lo usan base.html (catálogo, mediante @import) y layout.html (inicio, acceso y usuarios).
+   Las reglas de elementos sin clase (table, button, input, label, .msg, .ok, .no...)
+   mantienen el marcado del catálogo tal como está. */
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap");
+
+/* ---------- Variables ---------- */
+:root {
+  --fondo: #faf8f3;
+  --superficie: #ffffff;
+  --superficie-suave: #f3f0e8;
+  --tinta: #1f1d1a;
+  --texto-suave: #6b665c;
+  --borde: #e4dfd3;
+  --borde-fuerte: #cfc8b8;
+
+  --acento: #2f5d4e;
+  --acento-hover: #244a3e;
+  --acento-suave: #e6eee9;
+  --peligro: #9b3b2f;
+  --peligro-suave: #f6e8e5;
+  --aviso-suave: #f6efdc;
+
+  --fuente-titulos: "Source Serif 4", "Iowan Old Style", Charter, Georgia, serif;
+  --fuente-texto: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --esp-1: .25rem;
+  --esp-2: .5rem;
+  --esp-3: .75rem;
+  --esp-4: 1rem;
+  --esp-5: 1.5rem;
+  --esp-6: 2.5rem;
+  --esp-7: 4rem;
+
+  --radio: 6px;
+  --sombra: 0 1px 2px rgba(31, 29, 26, .05), 0 4px 16px rgba(31, 29, 26, .04);
+  --ancho: 1100px;
+  --transicion: 160ms ease;
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0 auto;
+  max-width: var(--ancho);
+  padding: var(--esp-5) var(--esp-4) var(--esp-7);
+  background: var(--fondo);
+  color: var(--tinta);
+  font: 400 1rem/1.6 var(--fuente-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Las páginas nuevas (layout.html) manejan su propio contenedor */
+body.app { max-width: none; padding: 0; }
+
+h1, h2, h3 {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+  margin: var(--esp-6) 0 var(--esp-4);
+}
+h1 { font-size: clamp(2rem, 4vw, 3rem); }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.25rem; }
+p { margin: 0 0 var(--esp-4); }
+
+a {
+  color: var(--acento);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: .2em;
+  transition: color var(--transicion), text-decoration-color var(--transicion);
+}
+a:hover { color: var(--acento-hover); text-decoration-color: currentColor; }
+
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+hr { border: 0; border-top: 1px solid var(--borde); margin: var(--esp-4) 0; }
+
+/* ---------- Catálogo (base.html) ---------- */
+/* El encabezado compartido ocupa todo el ancho aunque el body del catálogo esté centrado */
+html { overflow-x: clip; }
+body:not(.app) { padding-top: 0; }
+body:not(.app) > .cabecera {
+  margin: 0 calc(50% - 50vw) var(--esp-5);
+}
+
+/* Solo el bibliotecario ve los controles de edición del catálogo.
+   Es una ayuda visual: el servidor (auth.py) rechaza estas acciones a los demás roles. */
+body:has(.cabecera[data-gestion="no"]) :is(a[href$="/editar"], a[href*="/ejemplares/nuevo"],
+  a[href$="/libros/nuevo"], form[action$="/eliminar"]) {
+  display: none;
+}
+
+/* ---------- Mensajes ---------- */
+.msg {
+  margin: var(--esp-3) 0;
+  padding: var(--esp-3) var(--esp-4);
+  border: 1px solid #e8dcb8;
+  border-left: 3px solid #b8953a;
+  border-radius: var(--radio);
+  background: var(--aviso-suave);
+  animation: aparecer 240ms ease both;
+}
+.msg.ok-msg { background: var(--acento-suave); border-color: #c7d9cf; border-left-color: var(--acento); }
+.msg.error-msg { background: var(--peligro-suave); border-color: #e8c9c3; border-left-color: var(--peligro); }
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Formularios ---------- */
+label {
+  display: block;
+  margin: var(--esp-4) 0 var(--esp-1);
+  font-size: .875rem;
+  font-weight: 600;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: .55rem .7rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+input:hover, select:hover, textarea:hover { border-color: var(--texto-suave); }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px var(--acento-suave);
+}
+input:disabled, select:disabled { background: var(--superficie-suave); color: var(--texto-suave); }
+textarea { resize: vertical; }
+
+input[type=checkbox] {
+  width: auto;
+  accent-color: var(--acento);
+  margin: 0 .35rem 0 0;
+  vertical-align: -1px;
+}
+.chk { display: flex; flex-wrap: wrap; gap: var(--esp-2) var(--esp-4); }
+.chk label { display: inline; font-weight: 400; margin: 0; font-size: .95rem; }
+
+.row { display: flex; flex-wrap: wrap; gap: var(--esp-2); align-items: center; }
+.row input:not([type=checkbox]) { flex: 1 1 14rem; }
+form.inline { display: inline; }
+
+/* ---------- Botones ---------- */
+button, .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .5rem 1rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--tinta);
+  font: 500 .925rem/1.3 var(--fuente-texto);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--transicion), border-color var(--transicion),
+              color var(--transicion), transform var(--transicion);
+}
+button:hover, .btn:hover { border-color: var(--texto-suave); background: var(--superficie-suave); color: var(--tinta); }
+button:active, .btn:active { transform: translateY(1px); }
+
+/* Botones principales: los de guardar y buscar del catálogo, y .btn-primario */
+.btn-primario, form.row > button, form[method=post] > p > button {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: #fff;
+}
+.btn-primario:hover, form.row > button:hover, form[method=post] > p > button:hover {
+  background: var(--acento-hover);
+  border-color: var(--acento-hover);
+  color: #fff;
+}
+
+/* Acciones destructivas: los formularios de eliminar del catálogo y .btn-peligro */
+.btn-peligro, form[action*="eliminar"] button {
+  background: transparent;
+  border-color: #dcb8b1;
+  color: var(--peligro);
+}
+.btn-peligro:hover, form[action*="eliminar"] button:hover {
+  background: var(--peligro-suave);
+  border-color: var(--peligro);
+  color: var(--peligro);
+}
+
+.btn-sutil { border-color: transparent; background: transparent; color: var(--texto-suave); }
+.btn-sutil:hover { background: var(--superficie-suave); border-color: transparent; }
+
+table button, .btn-sm { padding: .3rem .65rem; font-size: .85rem; }
+
+.icono { width: 1.05em; height: 1.05em; flex: none; }
+
+/* ---------- Tablas ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--esp-3) 0 var(--esp-5);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: .925rem;
+}
+th, td {
+  padding: .7rem .85rem;
+  border-bottom: 1px solid var(--borde);
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: var(--superficie-suave);
+  color: var(--texto-suave);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+tr:last-child td { border-bottom: 0; }
+tr td { transition: background var(--transicion); }
+tr:hover td { background: #fcfbf8; }
+td a { font-weight: 500; }
+td form.inline { margin-left: var(--esp-2); }
+body > table td:first-child { white-space: nowrap; }  /* ISBN y códigos en una línea */
+
+/* Estado del catálogo: disponible / no disponible */
+.ok { color: var(--acento); font-weight: 500; }
+.no { color: var(--peligro); font-weight: 500; }
+
+/* ---------- Etiquetas de estado ---------- */
+.badge {
+  display: inline-block;
+  padding: .1rem .55rem;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  background: var(--superficie-suave);
+  color: var(--texto-suave);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.badge-ok { background: var(--acento-suave); border-color: #c7d9cf; color: var(--acento); }
+.badge-peligro { background: var(--peligro-suave); border-color: #e8c9c3; color: var(--peligro); }
+.badge-aviso { background: var(--aviso-suave); border-color: #e8dcb8; color: #7a6220; }
+
+/* ---------- Estructura de las páginas nuevas ---------- */
+.contenedor { max-width: var(--ancho); margin: 0 auto; padding: 0 var(--esp-4); }
+
+.cabecera { border-bottom: 1px solid var(--borde); background: var(--fondo); }
+.cabecera .contenedor {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--esp-3) var(--esp-5);
+  min-height: 4rem;
+  padding-top: var(--esp-2);
+  padding-bottom: var(--esp-2);
+}
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-right: auto;
+  color: var(--tinta);
+  font: 600 1.25rem var(--fuente-titulos);
+  text-decoration: none;
+}
+.marca:hover { color: var(--tinta); }
+.marca .icono { color: var(--acento); width: 1.3rem; height: 1.3rem; }
+
+.nav-principal { display: flex; align-items: center; flex-wrap: wrap; gap: var(--esp-2) var(--esp-4); }
+.nav-principal a:not(.btn) { color: var(--texto-suave); font-weight: 500; font-size: .95rem; }
+.nav-principal a:not(.btn):hover, .nav-principal a[aria-current] { color: var(--tinta); }
+.nav-principal a[aria-current] { text-decoration-color: var(--acento); text-decoration-thickness: 2px; text-underline-offset: .45em; }
+.nav-acciones { display: flex; align-items: center; gap: var(--esp-2); }
+
+main.contenedor { padding-top: var(--esp-5); padding-bottom: var(--esp-7); min-height: 60vh; }
+
+.pie { border-top: 1px solid var(--borde); color: var(--texto-suave); font-size: .875rem; }
+.pie .contenedor { padding-top: var(--esp-5); padding-bottom: var(--esp-5); }
+
+.encabezado-pagina {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+  margin: var(--esp-5) 0 var(--esp-4);
+}
+.encabezado-pagina h1 { margin: 0; font-size: clamp(1.75rem, 3vw, 2.25rem); }
+.antetitulo {
+  margin: 0 0 var(--esp-1);
+  color: var(--texto-suave);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.suave { color: var(--texto-suave); }
+.pequeno { font-size: .875rem; }
+
+/* ---------- Inicio ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--esp-6);
+  align-items: end;
+  padding: var(--esp-7) 0 var(--esp-6);
+  border-bottom: 1px solid var(--borde);
+}
+.hero h1 { margin: 0 0 var(--esp-4); font-size: clamp(2.25rem, 5vw, 3.5rem); font-weight: 400; }
+.hero h1 em { font-style: italic; color: var(--acento); }
+.hero .intro { max-width: 34rem; color: var(--texto-suave); font-size: 1.1rem; }
+
+.busqueda {
+  padding: var(--esp-5);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+}
+.busqueda label:first-child { margin-top: 0; }
+.busqueda .campos { display: flex; gap: var(--esp-2); margin-top: var(--esp-3); }
+.busqueda .campos select { flex: 0 0 9rem; }
+.busqueda button { width: 100%; justify-content: center; margin-top: var(--esp-3); }
+
+.cifras { display: flex; flex-wrap: wrap; gap: var(--esp-5); margin-top: var(--esp-5); }
+.cifras div { font-size: .875rem; color: var(--texto-suave); }
+.cifras strong { display: block; color: var(--tinta); font: 600 1.75rem/1.1 var(--fuente-titulos); }
+
+.seccion { padding: var(--esp-6) 0 0; }
+.seccion-titulo { display: flex; align-items: baseline; justify-content: space-between; gap: var(--esp-3); flex-wrap: wrap; }
+.seccion-titulo h2 { margin: 0 0 var(--esp-4); }
+
+.lista-libros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 var(--esp-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lista-libros li { padding: var(--esp-4) 0; border-top: 1px solid var(--borde); }
+.lista-libros a.titulo {
+  display: block;
+  color: var(--tinta);
+  font: 600 1.15rem/1.3 var(--fuente-titulos);
+}
+.lista-libros a.titulo:hover { color: var(--acento); }
+.lista-libros .meta { margin: var(--esp-1) 0 var(--esp-2); color: var(--texto-suave); font-size: .9rem; }
+
+.servicio {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--esp-5);
+}
+.servicio div { padding-top: var(--esp-4); border-top: 2px solid var(--tinta); }
+.servicio strong { display: block; font: 400 2.5rem/1 var(--fuente-titulos); color: var(--acento); }
+.servicio p { margin: var(--esp-2) 0 0; color: var(--texto-suave); }
+
+/* ---------- Acceso ---------- */
+.panel-acceso { max-width: 28rem; margin: var(--esp-6) auto 0; }
+.panel-acceso.ancho { max-width: 40rem; }
+.panel-acceso h1 { margin-top: 0; font-size: 2rem; }
+.panel-acceso form {
+  padding: var(--esp-5);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+}
+.panel-acceso form > label:first-of-type { margin-top: 0; }
+.panel-acceso .btn-primario { width: 100%; justify-content: center; margin-top: var(--esp-5); }
+
+.rejilla-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--esp-4); }
+.ayuda { margin: var(--esp-1) 0 0; color: var(--texto-suave); font-size: .8rem; }
+
+/* ---------- Usuarios ---------- */
+.filtros {
+  display: grid;
+  grid-template-columns: minmax(12rem, 2fr) repeat(4, minmax(8rem, 1fr)) auto;
+  gap: var(--esp-2);
+  align-items: end;
+  margin-bottom: var(--esp-4);
+}
+.filtros label { margin-top: 0; font-size: .75rem; color: var(--texto-suave); }
+
+.formulario {
+  max-width: 44rem;
+  padding: var(--esp-5);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+}
+.acciones { display: flex; flex-wrap: wrap; gap: var(--esp-2); align-items: center; margin-top: var(--esp-5); }
+
+.ficha {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: var(--esp-4) var(--esp-5);
+  margin: 0 0 var(--esp-5);
+  padding: var(--esp-5) 0;
+  border-top: 1px solid var(--borde);
+  border-bottom: 1px solid var(--borde);
+}
+.ficha dt { color: var(--texto-suave); font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.ficha dd { margin: var(--esp-1) 0 0; }
+
+.vacio { padding: var(--esp-5); color: var(--texto-suave); text-align: center; }
+.tabla-scroll { overflow-x: auto; }
+.tabla-scroll table { min-width: 40rem; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; padding-top: var(--esp-6); gap: var(--esp-5); }
+  .lista-libros, .servicio { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filtros .filtro-busqueda { grid-column: 1 / -1; }
+}
+
+@media (max-width: 640px) {
+  body { padding-top: var(--esp-4); }
+  h2 { font-size: 1.5rem; }
+  .lista-libros, .servicio, .rejilla-2, .filtros { grid-template-columns: 1fr; }
+  .busqueda .campos { flex-direction: column; }
+  .busqueda .campos select { flex: none; }
+  .panel-acceso form, .formulario { padding: var(--esp-4); }
+  /* Las tablas del catálogo no tienen contenedor: se desplazan horizontalmente */
+  body > table { display: block; overflow-x: auto; white-space: nowrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
+.logo-biblioteca {
+    width: 180px;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}

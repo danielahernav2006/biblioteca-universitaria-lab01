@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Editar' if editando else 'Nuevo' }} usuario · Biblioteca{% endblock %}
+{% block content %}
+<div class="encabezado-pagina">
+  <div>
+    <p class="antetitulo"><a href="{{ url_for('usuarios.listar_usuarios') }}">Usuarios</a></p>
+    <h1>{{ 'Editar usuario' if editando else 'Nuevo usuario' }}</h1>
+  </div>
+</div>
+<form class="formulario" method="post">
+  <input type="hidden" name="csrf" value="{{ csrf_token }}">
+  {% include "_campos_usuario.html" %}
+  {% if not editando %}
+  <div class="rejilla-2">
+    <div>
+      <label for="contrasena">Contraseña *</label>
+      <input id="contrasena" name="contrasena" type="password" minlength="8" required autocomplete="new-password">
+      <p class="ayuda">Mínimo 8 caracteres.</p>
+    </div>
+    <div>
+      <label for="confirmacion">Confirmar contraseña *</label>
+      <input id="confirmacion" name="confirmacion" type="password" minlength="8" required autocomplete="new-password">
+    </div>
+  </div>
+  {% else %}
+  <p class="ayuda" style="margin-top: 1rem">La contraseña no se modifica desde este formulario.</p>
+  {% endif %}
+  <div class="acciones">
+    <button class="btn btn-primario">Guardar</button>
+    <a class="btn btn-sutil" href="{{ url_for('usuarios.detalle_usuario', id_usuario=u.id_usuario) if editando else url_for('usuarios.listar_usuarios') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

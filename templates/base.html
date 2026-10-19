@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<title>{% block title %}Catálogo{% endblock %}</title>
+<style>
+@import url("/static/css/estilos.css");
+</style></head><body>
+{% include "_nav.html" %}
+{% for m in get_flashed_messages() %}<div class="msg">{{ m }}</div>{% endfor %}
+{% block content %}{% endblock %}
+</body></html>

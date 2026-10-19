@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% block title %}Mis préstamos{% endblock %}
+{% block content %}
+<h1>Mis préstamos</h1>
+<p>Consulta el estado de tus solicitudes y préstamos.</p>
+<div class="tabla-scroll"><table><thead><tr><th>Libro</th><th>Solicitud</th><th>Estado</th><th>Vencimiento</th><th>Devolución</th><th>Multa</th></tr></thead><tbody>
+{% for p in prestamos %}<tr><td>{{ p.titulo }}</td><td>{{ p.fecha_solicitud }}</td><td>{{ p.estado }}{% if p.motivo_rechazo %}<div class="ayuda">{{ p.motivo_rechazo }}</div>{% endif %}</td><td>{{ p.fecha_vencimiento or '—' }}</td><td>{{ p.fecha_devolucion or '—' }}</td><td>{{ '$' ~ p.monto if p.monto is not none else '—' }} {{ p.estado_multa or '' }}</td></tr>
+{% else %}<tr><td colspan="6">No tienes préstamos ni solicitudes todavía.</td></tr>{% endfor %}
+</tbody></table></div>
+<p><a class="btn btn-primario" href="{{ url_for('catalogo.listar_libros') }}">Explorar catálogo</a></p>
+{% endblock %}

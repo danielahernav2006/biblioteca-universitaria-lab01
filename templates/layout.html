@@ -1,0 +1,25 @@
+{% from "_iconos.html" import icono %}
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Biblioteca{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body class="app">
+{% include "_nav.html" %}
+
+<main class="contenedor">
+  {% for cat, m in get_flashed_messages(with_categories=true) %}
+    <div class="msg {{ 'ok-msg' if cat == 'ok' else 'error-msg' if cat == 'error' }}" role="status">{{ m }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="pie">
+  <div class="contenedor">Biblioteca universitaria · Catálogo y gestión de usuarios</div>
+</footer>
+</body>
+</html>

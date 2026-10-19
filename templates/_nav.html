@@ -1,0 +1,40 @@
+{# Encabezado compartido: lo usan layout.html y base.html (catálogo).
+   Los enlaces dependen de la sesión; los permisos reales se comprueban en el servidor (auth.py). #}
+{% from "_iconos.html" import icono %}
+{% set es_bibliotecario = usuario_actual and usuario_actual.rol == 'BIBLIOTECARIO' and usuario_actual.estado == 'ACTIVO' %}
+<header class="cabecera" data-gestion="{{ 'si' if es_bibliotecario else 'no' }}">
+  <div class="contenedor">
+    <a class="marca" href="{{ url_for('index') }}">
+    <img
+        src="{{ url_for('static', filename='img/logo_biblioteca.png') }}"
+        alt="Biblioteca Universitaria"
+        class="logo-biblioteca">
+    </a>
+    <nav class="nav-principal" aria-label="Principal">
+      <a href="{{ url_for('catalogo.listar_libros') }}"
+         {% if request.blueprint == 'catalogo' %}aria-current="page"{% endif %}>Catálogo</a>
+      {% if es_bibliotecario %}
+        <a href="{{ url_for('catalogo.form_libro') }}">Nuevo libro</a>
+        <a href="{{ url_for('usuarios.listar_usuarios') }}"
+           {% if request.blueprint == 'usuarios' %}aria-current="page"{% endif %}>Usuarios</a>
+        <a href="{{ url_for('reportes.ver_reportes') }}"
+           {% if request.blueprint == 'reportes' %}aria-current="page"{% endif %}>Reportes</a>
+      {% endif %}
+      {% if usuario_actual %}
+        {% if usuario_actual.rol in ('ESTUDIANTE', 'DOCENTE') %}<a href="{{ url_for('prestamos.mis_prestamos') }}">Mis préstamos</a>{% endif %}
+        {% if es_bibliotecario %}<a href="{{ url_for('prestamos.gestion') }}">Préstamos y devoluciones</a>{% endif %}
+        <a href="{{ url_for('auth.mi_cuenta') }}"
+           {% if request.endpoint == 'auth.mi_cuenta' %}aria-current="page"{% endif %}>Mi cuenta</a>
+        <form class="inline" method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf" value="{{ csrf_token }}">
+          <button class="btn btn-sutil btn-sm">{{ icono('salir') }} Salir</button>
+        </form>
+      {% else %}
+        <span class="nav-acciones">
+          <a class="btn btn-sutil btn-sm" href="{{ url_for('auth.login') }}">Ingresar</a>
+          <a class="btn btn-primario btn-sm" href="{{ url_for('auth.registro') }}">Crear cuenta</a>
+        </span>
+      {% endif %}
+    </nav>
+  </div>
+</header>
