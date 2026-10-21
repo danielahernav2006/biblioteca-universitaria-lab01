@@ -1,4 +1,4 @@
-# Mejoras integrante 5
+# Mejoras
 
 ## Instalación
 1. Guarda copia de tu carpeta actual y de la base de datos.
